@@ -1,5 +1,5 @@
 /*
- * ppm.c
+ * main.cu
  *
  *  Created on: 22/04/2012
  *      Author: Juan Antonio Aldea Armenteros
