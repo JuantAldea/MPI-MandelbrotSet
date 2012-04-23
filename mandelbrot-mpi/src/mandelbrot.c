@@ -27,8 +27,8 @@ void sparse_rows_version(int argc, char *argv[]) {
     MPI_Comm_rank(MPI_COMM_WORLD, &com_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &com_size);
 
-    int *chunk = NULL;
-    int *buffer = NULL;
+    unsigned char *chunk = NULL;
+    unsigned char *buffer = NULL;
 
     printf("Rank: %d, %d %d\n", com_rank, com_rank * win.pixels_height / com_size, win.pixels_height / com_size);
 
@@ -38,10 +38,10 @@ void sparse_rows_version(int argc, char *argv[]) {
     int buffer_size = win.pixels_width * win.pixels_height / com_size;
 
     if (com_rank == 0) {
-        buffer = (int*) malloc(sizeof(int) * win.pixels_height * win.pixels_width);
+        buffer = (unsigned char *) malloc(sizeof(unsigned char) * win.pixels_height * win.pixels_width);
     }
 
-    MPI_Gather(chunk, buffer_size, MPI_INTEGER, buffer, buffer_size, MPI_INTEGER, 0, MPI_COMM_WORLD);
+    MPI_Gather(chunk, buffer_size, MPI_UNSIGNED_CHAR, buffer, buffer_size, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
     char path[20];
     sprintf(path, "%d.pgm", com_rank);
 
@@ -51,7 +51,7 @@ void sparse_rows_version(int argc, char *argv[]) {
 
     //Output
     if (com_rank == 0) {
-        int *ordered_im = sparse_rows_image_reconstruction(com_size, win.pixels_height, win.pixels_width, buffer);
+        unsigned char *ordered_im = sparse_rows_image_reconstruction(com_size, win.pixels_height, win.pixels_width, buffer);
         write_pgm("mandelbrot.pgm", win.pixels_height, win.pixels_width, 255, ordered_im);
         free(ordered_im);
         free(buffer);
