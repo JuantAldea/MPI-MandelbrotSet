@@ -40,9 +40,9 @@ unsigned char *sparse_rows_mandelbrot(window win, int first_row, int n_rows, int
                     color++;
                 }
             }
-            if (color == max_iter){
+            if (color == max_iter) {
                 image[(j - first_row) / row_step * win.pixels_width + i] = 255;
-            }else{
+            } else {
                 image[(j - first_row) / row_step * win.pixels_width + i] = 0;
             }
         }

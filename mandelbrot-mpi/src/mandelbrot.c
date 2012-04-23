@@ -45,7 +45,7 @@ void sparse_rows_version(int argc, char *argv[]) {
     char path[20];
     sprintf(path, "%d.pgm", com_rank);
 
-    write_pgm(path, win.pixels_height, win.pixels_width/com_size, 255, chunk);
+    write_pgm(path, win.pixels_height, win.pixels_width / com_size, 255, chunk);
 
     free(chunk);
 
