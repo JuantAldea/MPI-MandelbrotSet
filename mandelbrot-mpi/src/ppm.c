@@ -20,6 +20,7 @@ int write_pgm(char *path, int height, int width, int grey_levels, unsigned char 
     fprintf(file, "%s\n%d %d\n%d\n", "P2", width, height, grey_levels);
 
     int i, j;
+
     //write data
     for (j = 0; j < height; j++) {
         for (i = 0; i < width; i++) {

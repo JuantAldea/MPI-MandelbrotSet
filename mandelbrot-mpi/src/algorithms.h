@@ -9,5 +9,6 @@
 #define ALGORITHMS_H_
 
 #include "sparse_rows.h"
+#include "continuous_rows.h"
 
 #endif /* ALGORITHMS_H_ */
