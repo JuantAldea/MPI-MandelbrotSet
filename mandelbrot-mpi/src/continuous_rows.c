@@ -83,15 +83,13 @@ unsigned char *mandelbrot_x_axis(window win, int first_pixel, int n_pixels, int 
 
 void continuous_rows_version(int argc, char *argv[]) {
     window win;
-    win.pixels_height = 4096;
+    int max_iters = atoi(argv[2]);
+    win.pixels_height = atoi(argv[1]);
     win.pixels_width = win.pixels_height;
     win.x_start = -2;
     win.x_len = 0.8 + 2;
-
     win.y_start = -1.5;
     win.y_len = 1.5 + 1.5;
-
-    int max_iters = 10000;
 
     int com_rank, com_size;
 
@@ -119,6 +117,7 @@ void continuous_rows_version(int argc, char *argv[]) {
 
     MPI_Gather(chunk, buffer_size, MPI_UNSIGNED_CHAR, buffer, buffer_size, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
     MPI_Gather(axis_chunk, win.pixels_width/com_size, MPI_UNSIGNED_CHAR, (buffer + win.pixels_height / 2 * win.pixels_width), win.pixels_width/com_size, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
+
     char path[20];
     sprintf(path, "%d.pgm", com_rank);
 

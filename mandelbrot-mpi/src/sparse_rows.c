@@ -66,13 +66,13 @@ unsigned char *sparse_rows_image_reconstruction(int n_threads, int pixels_height
 
 void sparse_rows_version(int argc, char *argv[]) {
     window win;
-    win.pixels_height = 2048;
-    win.pixels_width = 2048;
-    win.x_len = 4.0;
-    win.y_len = 4.0;
-    win.x_start = -2.0;
-    win.y_start = -2.0;
-    int max_iters = 100;
+    int max_iters = atoi(argv[2]);
+    win.pixels_height = atoi(argv[1]);
+    win.pixels_width = win.pixels_height;
+    win.x_start = -2;
+    win.x_len = 0.8 + 2;
+    win.y_start = -1.5;
+    win.y_len = 1.5 + 1.5;
 
     int com_rank, com_size;
 
