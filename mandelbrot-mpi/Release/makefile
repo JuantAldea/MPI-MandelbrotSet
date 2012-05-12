@@ -23,19 +23,19 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: mandelbrot
+all: mandelbrot-mpi
 
 # Tool invocations
-mandelbrot: $(OBJS) $(USER_OBJS)
+mandelbrot-mpi: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C Linker'
-	mpicc  -o "mandelbrot" $(OBJS) $(USER_OBJS) $(LIBS)
+	mpicc  -o "mandelbrot-mpi" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(OBJS)$(C_DEPS)$(EXECUTABLES) mandelbrot
+	-$(RM) $(OBJS)$(C_DEPS)$(EXECUTABLES) mandelbrot-mpi
 	-@echo ' '
 
 .PHONY: all clean dependents

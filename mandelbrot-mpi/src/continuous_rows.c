@@ -91,7 +91,7 @@ void continuous_rows_version(int argc, char *argv[]) {
     win.y_start = -1.5;
     win.y_len = 1.5 + 1.5;
 
-    int max_iters = 1000;
+    int max_iters = 10000;
 
     int com_rank, com_size;
 

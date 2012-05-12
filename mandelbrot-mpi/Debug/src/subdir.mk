@@ -4,18 +4,21 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../src/continuous_rows.c \
 ../src/mandelbrot.c \
 ../src/math_optimizations.c \
 ../src/ppm.c \
 ../src/sparse_rows.c 
 
 OBJS += \
+./src/continuous_rows.o \
 ./src/mandelbrot.o \
 ./src/math_optimizations.o \
 ./src/ppm.o \
 ./src/sparse_rows.o 
 
 C_DEPS += \
+./src/continuous_rows.d \
 ./src/mandelbrot.d \
 ./src/math_optimizations.d \
 ./src/ppm.d \

@@ -10,8 +10,10 @@
 
 #include "window.h"
 
+unsigned char *mandelbrot_x_axis(window win, int first_pixel, int n_pixels, int max_iter);
 unsigned char *continuous_rows_mandelbrot(window win, int first_row, int n_rows, int max_iter);
 
 void continuous_rows_version(int argc, char *argv[]);
+
 
 #endif /* CONTINUOUS_ROWS_H_ */
