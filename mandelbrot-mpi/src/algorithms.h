@@ -10,5 +10,6 @@
 
 #include "sparse_rows.h"
 #include "continuous_rows.h"
+#include "dynamic_row_assignment.h"
 
 #endif /* ALGORITHMS_H_ */

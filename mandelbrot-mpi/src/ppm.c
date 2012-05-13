@@ -5,7 +5,7 @@
  *      Author: Juan Antonio Aldea Armenteros
  */
 
-#include <stdio.h>
+
 #include "ppm.h"
 
 int write_pgm(char *path, int height, int width, int grey_levels, unsigned char data[]) {

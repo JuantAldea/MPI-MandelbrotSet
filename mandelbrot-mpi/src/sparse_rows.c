@@ -8,12 +8,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <math.h>
 #include <mpi.h>
 
 #include "ppm.h"
-#include "sparse_rows.h"
 #include "math_optimizations.h"
+
+#include "sparse_rows.h"
 
 unsigned char *sparse_rows_mandelbrot(window win, int first_row, int n_rows, int row_step, int max_iter) {
 
@@ -21,7 +21,7 @@ unsigned char *sparse_rows_mandelbrot(window win, int first_row, int n_rows, int
     float dx = win.x_len / win.pixels_width;
     float zr, zi, cr, ci, zrs, zis;
     int i, j, color;
-    i = j = -1;
+
     unsigned char *image = (unsigned char *) malloc(sizeof(unsigned char) * n_rows * win.pixels_width);
 
     for (j = first_row; j < win.pixels_height; j += row_step) {
@@ -43,11 +43,7 @@ unsigned char *sparse_rows_mandelbrot(window win, int first_row, int n_rows, int
                 }
             }
 
-            if (color == max_iter) {
-                image[(j - first_row) / row_step * win.pixels_width + i] = 255;
-            } else {
-                image[(j - first_row) / row_step * win.pixels_width + i] = 0;
-            }
+            image[(j - first_row) / row_step * win.pixels_width + i] = (color == max_iter) ? 255 : 0;
         }
     }
     return image;

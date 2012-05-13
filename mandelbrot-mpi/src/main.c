@@ -4,9 +4,8 @@
  *  Created on: 22/04/2012
  *      Author: Juan Antonio Aldea Armenteros
  */
-#include <stdio.h>
+
 #include <stdlib.h>
-#include <mpi.h>
 
 #include "algorithms.h"
 

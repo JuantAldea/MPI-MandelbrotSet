@@ -9,12 +9,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <math.h>
 #include <mpi.h>
 
 #include "ppm.h"
-#include "continuous_rows.h"
 #include "math_optimizations.h"
+
+#include "continuous_rows.h"
 
 unsigned char *continuous_rows_mandelbrot(window win, int first_row, int n_rows, int max_iter) {
 
@@ -22,7 +22,7 @@ unsigned char *continuous_rows_mandelbrot(window win, int first_row, int n_rows,
     float dx = win.x_len / win.pixels_width;
     float zr, zi, cr, ci, zrs, zis;
     int i, j, color;
-    i = j = -1;
+
     unsigned char *image = (unsigned char *) malloc(sizeof(unsigned char) * n_rows * win.pixels_width);
 
     for (j = first_row; j < first_row + n_rows; j++) {
