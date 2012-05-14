@@ -5,8 +5,10 @@
  *      Author: Juan Antonio Aldea Armenteros
  */
 
-#ifndef WINDOW_H_
-#define WINDOW_H_
+#ifndef TYPES_H_
+#define TYPES_H_
+
+typedef unsigned char uchar;
 
 typedef struct {
     int pixels_height;
@@ -17,4 +19,4 @@ typedef struct {
     float x_len;
 } window;
 
-#endif /* WINDOW_H_ */
+#endif /* TYPES_H_ */

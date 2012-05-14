@@ -15,14 +15,14 @@
 
 #include "sparse_rows.h"
 
-unsigned char *sparse_rows_mandelbrot(window win, int first_row, int n_rows, int row_step, int max_iter) {
+uchar *sparse_rows_mandelbrot(window win, int first_row, int n_rows, int row_step, int max_iter) {
 
     float dy = win.y_len / win.pixels_height;
     float dx = win.x_len / win.pixels_width;
     float cr, ci;
     int i, j;
 
-    unsigned char *image = (unsigned char *) malloc(sizeof(unsigned char) * n_rows * win.pixels_width);
+    uchar *image = (uchar *) malloc(sizeof(uchar) * n_rows * win.pixels_width);
 
     for (j = first_row; j < win.pixels_height; j += row_step) {
         for (i = 0; i < win.pixels_width; i++) {
@@ -34,12 +34,12 @@ unsigned char *sparse_rows_mandelbrot(window win, int first_row, int n_rows, int
     return image;
 }
 
-unsigned char *sparse_rows_image_reconstruction(int n_threads, int pixels_height, int pixels_width, unsigned char buffer[]) {
+uchar *sparse_rows_image_reconstruction(int n_threads, int pixels_height, int pixels_width, uchar buffer[]) {
     int j;
-    unsigned char *output = (unsigned char *) malloc(sizeof(unsigned char) * pixels_height * pixels_width);
+    uchar *output = (uchar *) malloc(sizeof(uchar) * pixels_height * pixels_width);
     for (j = 0; j < pixels_height; j++) {
         memcpy(output + j * pixels_width, buffer + ((j % n_threads) * pixels_height / n_threads + j / n_threads) * pixels_width,
-                sizeof(unsigned char) * pixels_width);
+                sizeof(uchar) * pixels_width);
     }
     return output;
 }
@@ -61,8 +61,8 @@ void sparse_rows_version(int argc, char *argv[]) {
     MPI_Comm_rank(MPI_COMM_WORLD, &com_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &com_size);
 
-    unsigned char *chunk = NULL;
-    unsigned char *buffer = NULL;
+    uchar *chunk = NULL;
+    uchar *buffer = NULL;
 
     printf("Rank: %d, %d %d\n", com_rank, com_rank * win.pixels_height / com_size, win.pixels_height / com_size);
 
@@ -71,7 +71,7 @@ void sparse_rows_version(int argc, char *argv[]) {
     int buffer_size = win.pixels_width * win.pixels_height / com_size;
 
     if (com_rank == 0) {
-        buffer = (unsigned char *) malloc(sizeof(unsigned char) * win.pixels_height * win.pixels_width);
+        buffer = (uchar *) malloc(sizeof(uchar) * win.pixels_height * win.pixels_width);
     }
 
     MPI_Gather(chunk, buffer_size, MPI_UNSIGNED_CHAR, buffer, buffer_size, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
@@ -84,7 +84,7 @@ void sparse_rows_version(int argc, char *argv[]) {
 
     //Output
     if (com_rank == 0) {
-        unsigned char *ordered_im = sparse_rows_image_reconstruction(com_size, win.pixels_height, win.pixels_width, buffer);
+        uchar *ordered_im = sparse_rows_image_reconstruction(com_size, win.pixels_height, win.pixels_width, buffer);
         write_pgm("mandelbrot.pgm", win.pixels_height, win.pixels_width, 255, ordered_im);
         free(ordered_im);
         free(buffer);

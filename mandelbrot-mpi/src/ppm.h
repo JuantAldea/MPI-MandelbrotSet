@@ -9,8 +9,8 @@
 #define PPM_H_
 
 #include <stdio.h>
-
-int write_pgm(char *path, int height, int width, int grey_levels, unsigned char data[]);
-int write_ppm(char *path, int height, int width, int grey_levels, unsigned char data[]);
+#include "types.h"
+int write_pgm(char *path, int height, int width, int grey_levels, uchar data[]);
+int write_ppm(char *path, int height, int width, int grey_levels, uchar data[]);
 
 #endif /* PPM_H_ */

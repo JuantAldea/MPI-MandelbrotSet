@@ -8,7 +8,7 @@
 
 #include "ppm.h"
 
-int write_pgm(char *path, int height, int width, int grey_levels, unsigned char data[]) {
+int write_pgm(char *path, int height, int width, int grey_levels, uchar data[]) {
     FILE *file = fopen(path, "w");
 
     if (!file) {
@@ -34,7 +34,7 @@ int write_pgm(char *path, int height, int width, int grey_levels, unsigned char 
     return 0;
 }
 
-int write_ppm(char *path, int height, int width, int grey_levels, unsigned char data[]) {
+int write_ppm(char *path, int height, int width, int grey_levels, uchar data[]) {
     FILE *file = fopen(path, "w");
 
     if (!file) {

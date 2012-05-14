@@ -7,7 +7,7 @@
 
 #include "dynamic_row_assignment.h"
 
-typedef unsigned char uchar;
+
 /*
 int calc_point(int cr, int ci, int max_iter) {
     float zi, zr, zrs, zis;

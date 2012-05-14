@@ -8,8 +8,9 @@
 #ifndef DYNAMIC_ROW_ASISGNMENT_H_
 #define DYNAMIC_ROW_ASISGNMENT_H_
 #include <stdlib.h>
+
 #include "ppm.h"
-#include "math_optimizations.h"
-#include "window.h"
+#include "types.h"
+#include "mandelbrot_iteration.h"
 
 #endif /* DYNAMIC_ROW_ASISGNMENT_H_ */
