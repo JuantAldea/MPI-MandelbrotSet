@@ -11,7 +11,7 @@
 #include <mpi.h>
 
 #include "ppm.h"
-#include "math_optimizations.h"
+#include "mandelbrot_iteration.h"
 
 #include "sparse_rows.h"
 
@@ -19,31 +19,16 @@ unsigned char *sparse_rows_mandelbrot(window win, int first_row, int n_rows, int
 
     float dy = win.y_len / win.pixels_height;
     float dx = win.x_len / win.pixels_width;
-    float zr, zi, cr, ci, zrs, zis;
-    int i, j, color;
+    float cr, ci;
+    int i, j;
 
     unsigned char *image = (unsigned char *) malloc(sizeof(unsigned char) * n_rows * win.pixels_width);
 
     for (j = first_row; j < win.pixels_height; j += row_step) {
         for (i = 0; i < win.pixels_width; i++) {
-            zi = ci = (float) win.y_start + (float) j * dy;
-            zr = cr = (float) win.x_start + (float) i * dx;
-            zrs = zis = (float) 0;
-            color = 0;
-
-            if (test_point_in_cardiod_or_2ndbud(zr, zi)) {
-                color = max_iter;
-            } else {
-                while (zrs + zis < (float) 4 && color < max_iter) {
-                    zrs = zr * zr;
-                    zis = zi * zi;
-                    zi = (float) 2 * zr * zi + ci;
-                    zr = zrs - zis + cr;
-                    color++;
-                }
-            }
-
-            image[(j - first_row) / row_step * win.pixels_width + i] = (color == max_iter) ? 255 : 0;
+            ci = (float) win.y_start + (float) j * dy;
+            cr = (float) win.x_start + (float) i * dx;
+            image[(j - first_row) / row_step * win.pixels_width + i] = (mandelbrot_iteration(cr, ci, max_iter) == max_iter) ? 255 : 0;
         }
     }
     return image;
