@@ -19,4 +19,6 @@ typedef struct {
     float x_len;
 } window;
 
+typedef enum{TASK = 0, FINISH, TASK_REQUEST, DATA} msg_tag;
+
 #endif /* TYPES_H_ */

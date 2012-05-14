@@ -53,6 +53,9 @@ uchar *mandelbrot_x_axis(window win, int first_pixel, int n_pixels, int max_iter
 }
 
 void continuous_rows_version(int argc, char *argv[]) {
+
+
+    MPI_Init(&argc, &argv);
     window win;
     int max_iters = atoi(argv[2]);
     win.pixels_height = atoi(argv[1]);
@@ -63,8 +66,6 @@ void continuous_rows_version(int argc, char *argv[]) {
     win.y_len = 1.5 + 1.5;
 
     int com_rank, com_size;
-
-    MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &com_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &com_size);
 
