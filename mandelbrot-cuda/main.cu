@@ -30,7 +30,7 @@ __global__ void render(unsigned char *out, int width, int height) {
 	float y = 0.0;
 
 	int iteration = 0;
-	int max_iteration = 10000;
+	int max_iteration = 1000;
 
 	while (x * x + y * y <= 4 && iteration < max_iteration) {
 		float xtemp = x * x - y * y + x_origin;
@@ -57,7 +57,7 @@ void runCUDA(int width, int height) {
 	unsigned char *device_memory, *host_memory;
 	dim3 blockDim(16, 16, 1);
 	//dim3 gridDim(width / (pix_per_thread * blockDim.x), height / (2 * pix_per_thread * blockDim.y), 1);
-	dim3 gridDim(width / (blockDim.x), height / (blockDim.y), 1);
+	dim3 gridDim(width / (blockDim.x), height / (2 * blockDim.y), 1);
 	cudaError_t cuda_error;
 	cudaDeviceReset();
 	cuda_error = cudaSetDeviceFlags(cudaDeviceMapHost);
@@ -110,7 +110,7 @@ void runCUDA(int width, int height) {
 }
 
 int main(int argc, const char * argv[]) {
-	int dim = 64;
+	int dim = 2048;
 	runCUDA(dim, dim);
 	return 0;
 }
