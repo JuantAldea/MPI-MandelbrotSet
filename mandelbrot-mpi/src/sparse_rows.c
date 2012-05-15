@@ -85,7 +85,9 @@ void sparse_rows_version(int argc, char *argv[]) {
     //Output
     if (com_rank == 0) {
         uchar *ordered_im = sparse_rows_image_reconstruction(com_size, win.pixels_height, win.pixels_width, buffer);
-        write_pgm("mandelbrot.pgm", win.pixels_height, win.pixels_width, 255, ordered_im);
+        char path[100];
+        sprintf(path, "mandelbrot_%s_%s.ppm", argv[1], argv[2]);
+        write_pgm(path, win.pixels_height, win.pixels_width, 255, ordered_im);
         free(ordered_im);
         free(buffer);
     }

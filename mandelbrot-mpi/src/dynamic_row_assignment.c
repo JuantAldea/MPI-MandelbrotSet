@@ -107,7 +107,9 @@ void dynamic_row_assignment(int argc, char *argv[]){
     if (com_rank == com_root){
         uchar *image = (uchar *)malloc(sizeof(uchar) * win.pixels_height * win.pixels_width);
         server(win, com_size, image);
-        write_pgm("broza.ppm", win.pixels_height, win.pixels_width, 256, image);
+        char path[100];
+        sprintf(path, "mandelbrot_%s_%s.ppm", argv[1], argv[2]);
+        write_pgm(path, win.pixels_height, win.pixels_width, 256, image);
         free(image);
     }else{
         client(win, com_root, max_iters);
