@@ -30,19 +30,26 @@ void client(window win, int com_root, int max_iter) {
     uchar *row_colors = (uchar *) malloc(sizeof(uchar) * win.pixels_width);
 
     while(1){
-        MPI_Send(&communication_buffer, 1, MPI_INT, com_root, TASK_REQUEST, MPI_COMM_WORLD);
-
+        printf("CLIENTE ESPERANDO ORDENES\n");
         MPI_Recv(&communication_buffer, 1, MPI_INT, com_root, MPI_ANY_TAG,  MPI_COMM_WORLD, &status);
         if (status.MPI_TAG == FINISH) {
+            printf("Me mandan TERMINAR\n");
             break;
         }
-        printf ("calculando %d\n", communication_buffer);
-        calc_row(win, communication_buffer, max_iter, row_colors);
-
+        printf ("Cliente calculando %d\n", communication_buffer);
+        //calc_row(win, communication_buffer, max_iter, row_colors);
+        int i;
+       memset(row_colors, 1, sizeof(uchar) * win.pixels_width);
+        for (i = 0; i < win.pixels_width; i++){
+            printf ("%d ", row_colors[i]);
+        }
         MPI_Send(&row_colors, win.pixels_width, MPI_UNSIGNED_CHAR, com_root, DATA, MPI_COMM_WORLD);
-        printf ("enviando %d\n", communication_buffer);
+        for (i = 0; i < win.pixels_width; i++){
+            printf ("%d ", row_colors[i]);
+        }
+        printf ("Cliente enviado %d\n", communication_buffer);
     }
-
+    printf ("##################Soy cliente y he terminado\n");
     free(row_colors);
     return;
 }
@@ -51,48 +58,58 @@ void server(window win, int com_size, uchar *image){
     MPI_Status status;
     printf ("Numero de clientes: %d\n", com_size - 1);
     int *current_taks_assign = (int *)malloc (sizeof(int) * com_size);
-    if (current_taks_assign == NULL){
-        printf("ES NULL\n");
-    }
+
+
+    uchar *buffer = (uchar *) malloc(sizeof(uchar) * win.pixels_width);
+    int next_task = 0;
+    int tasks_completed = 0;
     int i;
-    for (i = 0; i < com_size; i++){
-        current_taks_assign[i] = -1;
+
+    memset(buffer, 2, sizeof(uchar) * win.pixels_width);
+    for (i = 0; i < win.pixels_width; i++){
+        printf ("%d ", buffer[i]);
+    }
+    printf("\n");
+
+    for (i = 1; i < com_size && i < win.pixels_height; i++){
+        printf("Enviado tarea inicial %d -> %d\n", i, next_task);
+        MPI_Send(&next_task, 1, MPI_INT, i, TASK, MPI_COMM_WORLD);
+        current_taks_assign[i] = next_task;
+        next_task++;
     }
     printf("#################################\n");
-    void *buffer = (void *) malloc(sizeof(uchar) * win.pixels_width);
-    uchar *buffer_data = NULL;
-    int communication_buffer;
-
-    int next_task = win.pixels_height / 2;
-    int writes_pending = win.pixels_height / 2;
-
-    while (writes_pending > 0){
-        MPI_Recv(&communication_buffer, win.pixels_width, MPI_BYTE, MPI_ANY_SOURCE, MPI_ANY_TAG,  MPI_COMM_WORLD, &status);
+    while (tasks_completed < win.pixels_width){
+        printf("Voy por la tarea %d y he recibido %d filas\n", next_task, tasks_completed);
+        //MPI_Recv(buf,    count,            datatype,          source,         tag,  comm,            status);
+        MPI_Recv(buffer, win.pixels_width, MPI_UNSIGNED_CHAR, MPI_ANY_SOURCE, DATA, MPI_COMM_WORLD, &status);
+        if(status.MPI_ERROR){
+            printf("ERROR\n");
+            exit(-1);
+        }
+        printf("Recibo comunicacion de %d\n", status.MPI_SOURCE);
         if (status.MPI_TAG == DATA) {
-            /*
-            buffer_data = (uchar *)buffer;
-            memcpy(image + win.pixels_width * current_taks_assign[status.MPI_SOURCE - 1], buffer_data, sizeof(uchar) * win.pixels_width);
-            if (current_taks_assign[status.MPI_SOURCE - 1] != win.pixels_height / 2){
-                memcpy(image + win.pixels_width *(win.pixels_height - current_taks_assign[status.MPI_SOURCE - 1]),
-                        buffer_data, sizeof(uchar) * win.pixels_width);
+            printf("\tHe recibo datos de %d\n", status.MPI_SOURCE);
+            printf("\t\tProceso los datos de %d\n", status.MPI_SOURCE);
+            memcpy(image, buffer, sizeof(uchar) * win.pixels_width);
+            for (i = 0; i < win.pixels_width; i++){
+                printf ("%d %d ", image[i], buffer[i]);
             }
-            */
-            //current_taks_assign[status.MPI_SOURCE] = -1;//change status to free
-            //writes_pending--;
-        }else if (status.MPI_TAG == TASK_REQUEST){
-
-            if (next_task >= 0){
-                printf("ANTES %d\n", status.MPI_SOURCE);
-                current_taks_assign[status.MPI_SOURCE] = next_task; //<<--------- ESTA REVENTANDO AQUI
-                printf("Peticion de %d -> %d\n", status.MPI_SOURCE, next_task);
-                MPI_Send(&next_task, 1, MPI_INT, status.MPI_SOURCE, TASK, MPI_COMM_WORLD);
-                next_task--;
-            }else{
-                printf("Peticion de %d -> ACABAR\n", status.MPI_SOURCE);
-                MPI_Send(&next_task, 1, MPI_INT, status.MPI_SOURCE, FINISH, MPI_COMM_WORLD);
-            }
+            printf("\n");
+            current_taks_assign[status.MPI_SOURCE] = -1;//change status to free
+            tasks_completed++;
+            if (next_task < win.pixels_height){
+                 printf("\t\t quedan tareas, asi que le envio a %d la tarea %d\n", status.MPI_SOURCE, next_task);
+                 MPI_Send(&next_task, 1, MPI_INT, status.MPI_SOURCE, TASK, MPI_COMM_WORLD);
+                 current_taks_assign[status.MPI_SOURCE] = next_task;
+                 next_task++;
+             }else{
+                 printf("\t\t NO quedan tareas, se manda FIN\n");
+                 MPI_Send(&next_task, 1, MPI_INT, status.MPI_SOURCE, FINISH, MPI_COMM_WORLD);
+             }
+            printf("\tFin del procesamiento de los datos recibidos\n");
         }
     }
+    printf("SERVIDOR TERMINA\n");
     free(buffer);
 }
 
@@ -115,11 +132,17 @@ void dynamic_row_assignment(int argc, char *argv[]){
 
     if (com_rank == com_root){
         uchar *image = (uchar *)malloc(sizeof(uchar) * win.pixels_height * win.pixels_width);
+       int i;
+       for (i = 0; i < win.pixels_height * win.pixels_width; i++){
+           image[i] = 128;
+       }
         server(win, com_size, image);
+        printf("servidor vuelve al main\n");
         write_pgm("broza.ppm", win.pixels_height, win.pixels_width, 255, image);
     }else{
         client(win, com_root, max_iters);
-
+        printf("cliente vuelve al main\n");
     }
     MPI_Finalize();
 }
+
