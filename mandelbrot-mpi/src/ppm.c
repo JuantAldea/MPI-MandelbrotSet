@@ -16,12 +16,9 @@ int write_pgm(char *path, int height, int width, int grey_levels, uchar data[]) 
         return -1;
     }
 
-    //write header
     fprintf(file, "%s\n%d %d\n%d\n", "P2", width, height, grey_levels - 1);
 
     int i, j;
-
-    //write data
     for (j = 0; j < height; j++) {
         for (i = 0; i < width; i++) {
             fprintf(file, "%d ", data[j * width + i]);
@@ -42,11 +39,9 @@ int write_ppm(char *path, int height, int width, int color_levels, uchar data[])
         return -1;
     }
 
-    //write header
     fprintf(file, "%s\n%d %d\n%d\n", "P3", width, height, color_levels - 1);
 
     int i, j;
-    //write data
     for (j = 0; j < height; j++) {
         for (i = 0; i < width; i++) {
             fprintf(file, "%d %d %d  ", data[j * 3 * width + 3 * i + 0], data[j * 3 * width + 3 * i + 1], data[j * 3 * width + 3 * i + 2]);

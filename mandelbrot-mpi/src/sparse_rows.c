@@ -17,8 +17,8 @@
 
 uchar *sparse_rows_mandelbrot(window win, int first_row, int n_rows, int row_step, int max_iter) {
 
-    float dy = win.y_len / win.pixels_height;
-    float dx = win.x_len / win.pixels_width;
+    float dy = win.y_len /(float) win.pixels_height;
+    float dx = win.x_len /(float) win.pixels_width;
     float cr, ci;
     int i, j;
 
@@ -51,7 +51,7 @@ void sparse_rows_version(int argc, char *argv[]) {
     win.pixels_height = atoi(argv[1]);
     win.pixels_width = win.pixels_height;
     win.x_start = -2;
-    win.x_len = 0.8 + 2;
+    win.x_len = 0.8f + 2.0f;
     win.y_start = -1.5;
     win.y_len = 1.5 + 1.5;
 
@@ -82,7 +82,6 @@ void sparse_rows_version(int argc, char *argv[]) {
 
     free(chunk);
 
-    //Output
     if (com_rank == 0) {
         uchar *ordered_im = sparse_rows_image_reconstruction(com_size, win.pixels_height, win.pixels_width, buffer);
         char path[100];

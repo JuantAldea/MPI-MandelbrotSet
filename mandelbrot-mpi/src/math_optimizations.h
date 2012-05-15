@@ -8,8 +8,11 @@
 #ifndef MATH_OPTIMIZATIONS_H_
 #define MATH_OPTIMIZATIONS_H_
 
-//http://en.wikipedia.org/wiki/Mandelbrot_set#Optimization
-//http://linas.org/art-gallery/bud/bud.html
-inline int test_point_in_cardiod_or_2ndbud(float x, float y);
+/*
+ *http://en.wikipedia.org/wiki/Mandelbrot_set#Optimization
+ *http://linas.org/art-gallery/bud/bud.html
+ */
+
+int test_point_in_cardiod_or_2ndbud(float x, float y);
 
 #endif /* MATH_OPTIMIZATIONS_H_ */

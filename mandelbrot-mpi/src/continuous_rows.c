@@ -19,8 +19,8 @@
 
 uchar *continuous_rows_mandelbrot(window win, int first_row, int n_rows, int max_iter) {
 
-    float dy = win.y_len / win.pixels_height;
-    float dx = win.x_len / win.pixels_width;
+    float dy = win.y_len /(float) win.pixels_height;
+    float dx = win.x_len /(float) win.pixels_width;
     float cr, ci;
     int i, j;
 
@@ -37,8 +37,8 @@ uchar *continuous_rows_mandelbrot(window win, int first_row, int n_rows, int max
 }
 
 uchar *mandelbrot_x_axis(window win, int first_pixel, int n_pixels, int max_iter){
-    float dy = win.y_len / win.pixels_height;
-    float dx = win.x_len / win.pixels_width;
+    float dy = win.y_len /(float) win.pixels_height;
+    float dx = win.x_len /(float) win.pixels_width;
     float cr, ci;
     int j;
 
@@ -61,7 +61,7 @@ void continuous_rows_version(int argc, char *argv[]) {
     win.pixels_height = atoi(argv[1]);
     win.pixels_width = win.pixels_height;
     win.x_start = -2;
-    win.x_len = 0.8 + 2;
+    win.x_len = 0.8f + 2.0f;
     win.y_start = -1.5;
     win.y_len = 1.5 + 1.5;
 
@@ -97,7 +97,6 @@ void continuous_rows_version(int argc, char *argv[]) {
 
     free(chunk);
 
-    //Output
     if (com_rank == 0) {
         int i;
         for (i = 1; i < win.pixels_height/2; i++){

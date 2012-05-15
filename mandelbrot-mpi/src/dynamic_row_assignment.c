@@ -13,8 +13,8 @@
 #include "dynamic_row_assignment.h"
 
 void calc_row(window win, int row, int max_iter, uchar *buffer) {
-    float dy = win.y_len / win.pixels_height;
-    float dx = win.x_len / win.pixels_width;
+    float dy = win.y_len /(float) win.pixels_height;
+    float dx = win.x_len /(float) win.pixels_width;
     float zi = (float) win.y_start + (float) row * dy;
     float zr;
 
@@ -98,7 +98,7 @@ void dynamic_row_assignment(int argc, char *argv[]){
     win.pixels_height = atoi(argv[1]);
     win.pixels_width = win.pixels_height;
     win.x_start = -2;
-    win.x_len = 0.8 + 2;
+    win.x_len = 0.8f + 2.f;
     win.y_start = -1.5;
     win.y_len = 1.5 + 1.5;
 
