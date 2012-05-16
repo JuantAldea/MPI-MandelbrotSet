@@ -1,0 +1,8 @@
+##############
+# Executable #
+##############
+
+mandelbrot-mpi*
+*.tex
+*.pdf
+result*
