@@ -12,6 +12,8 @@
 #include "ppm.h"
 #include "dynamic_row_assignment.h"
 
+typedef int task_data[2];
+
 void calc_row(window win, int row, int max_iter, uchar *buffer) {
     float dy = win.y_len /(float) win.pixels_height;
     float dx = win.x_len /(float) win.pixels_width;
@@ -30,19 +32,33 @@ void client(window win, int com_root, int max_iter) {
     int communication_buffer = 0;
     uchar *buffer = (uchar *)malloc(sizeof(uchar) * win.pixels_width);
     int com_rank;
+    double t_wait = 0;
+    double t_busy = 0;
+    double t_aux;
+    int tasks_solved = 0;
     MPI_Comm_rank(MPI_COMM_WORLD, &com_rank);
 
+
     while(1){
+        t_aux = MPI_Wtime();
         MPI_Recv(&communication_buffer, 1, MPI_INT, com_root, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+        t_wait += MPI_Wtime() - t_aux;
 
         if(status.MPI_TAG == FINISH){
             break;
         }
 
+        t_aux = MPI_Wtime();
         calc_row(win, communication_buffer, max_iter, buffer);
+        t_busy += MPI_Wtime() - t_aux;
+
+        t_aux = MPI_Wtime();
         MPI_Send(buffer, win.pixels_width, MPI_UNSIGNED_CHAR, com_root, DATA, MPI_COMM_WORLD);
+        t_wait += MPI_Wtime() - t_aux;
+        tasks_solved++;
     }
 
+    printf ("%f, %f, %d\n", t_busy, t_wait, tasks_solved);
     free(buffer);
     return;
 }
@@ -76,10 +92,11 @@ void server(window win, int com_size, uchar *image){
         }
 
         memcpy(image + previous_task * win.pixels_width, buffer, sizeof(uchar) * win.pixels_width);
-
+        /*
         if (previous_task != total_tasks){
             memcpy(image + (2 * total_tasks - previous_task) * win.pixels_width, buffer, sizeof(uchar) * win.pixels_width);
         }
+        */
     }
 
     free(buffer);
@@ -87,13 +104,7 @@ void server(window win, int com_size, uchar *image){
 }
 
 void dynamic_row_assignment(int argc, char *argv[]){
-    MPI_Init(&argc, &argv);
-    int com_rank, com_size;
-    MPI_Comm_rank(MPI_COMM_WORLD, &com_rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &com_size);
-
     int max_iters = atoi(argv[2]);
-
     window win;
     win.pixels_height = atoi(argv[1]);
     win.pixels_width = win.pixels_height;
@@ -101,14 +112,19 @@ void dynamic_row_assignment(int argc, char *argv[]){
     win.x_len = 0.8f + 2.f;
     win.y_start = -1.5;
     win.y_len = 1.5 + 1.5;
-
+    int com_rank, com_size;
     int com_root = 0;
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &com_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &com_size);
 
     if (com_rank == com_root){
         uchar *image = (uchar *)malloc(sizeof(uchar) * win.pixels_height * win.pixels_width);
+        memset(image, 0, sizeof(uchar) * win.pixels_height * win.pixels_width);
         server(win, com_size, image);
         char path[100];
         sprintf(path, "mandelbrot_%s_%s.ppm", argv[1], argv[2]);
+        write_pgm(path, win.pixels_height, win.pixels_width, 256, image);
         write_pgm(path, win.pixels_height, win.pixels_width, 256, image);
         free(image);
     }else{
