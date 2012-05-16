@@ -15,14 +15,13 @@
 typedef int task_data[2];
 
 void calc_row(window win, int row, int max_iter, uchar *buffer) {
-    float dy = win.y_len /(float) win.pixels_height;
-    float dx = win.x_len /(float) win.pixels_width;
-    float zi = (float) win.y_start + (float) row * dy;
-    float zr;
-
+    double dy = win.y_len /(double) win.pixels_height;
+    double dx = win.x_len /(double) win.pixels_width;
+    double zi = (double) win.y_start + (double) row * dy;
+    double zr;
     int i;
     for (i = 0; i < win.pixels_width; i++) {
-        zr = (float) win.x_start + (float) i * dx;
+        zr = (double) win.x_start + (double) i * dx;
         buffer[i] = ((mandelbrot_iteration(zr, zi, max_iter) == max_iter) ? 255 : 0);
     }
 }
@@ -33,32 +32,32 @@ void client(window win, int com_root, int max_iter) {
     uchar *buffer = (uchar *)malloc(sizeof(uchar) * win.pixels_width);
     int com_rank;
     double t_wait = 0;
-    double t_busy = 0;
     double t_aux;
     int tasks_solved = 0;
     MPI_Comm_rank(MPI_COMM_WORLD, &com_rank);
 
+    double total_time = MPI_Wtime();
 
     while(1){
         t_aux = MPI_Wtime();
-        MPI_Recv(&communication_buffer, 1, MPI_INT, com_root, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+            MPI_Recv(&communication_buffer, 1, MPI_INT, com_root, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
         t_wait += MPI_Wtime() - t_aux;
 
         if(status.MPI_TAG == FINISH){
             break;
         }
 
-        t_aux = MPI_Wtime();
         calc_row(win, communication_buffer, max_iter, buffer);
-        t_busy += MPI_Wtime() - t_aux;
 
         t_aux = MPI_Wtime();
-        MPI_Send(buffer, win.pixels_width, MPI_UNSIGNED_CHAR, com_root, DATA, MPI_COMM_WORLD);
+            MPI_Send(buffer, win.pixels_width, MPI_UNSIGNED_CHAR, com_root, DATA, MPI_COMM_WORLD);
         t_wait += MPI_Wtime() - t_aux;
         tasks_solved++;
     }
 
-    printf ("%f, %f, %d\n", t_busy, t_wait, tasks_solved);
+    total_time = MPI_Wtime() - total_time;
+    printf ("%f, %f, %d\n", total_time, t_wait, tasks_solved);
+
     free(buffer);
     return;
 }
@@ -69,35 +68,54 @@ void server(window win, int com_size, uchar *image){
     int total_tasks = win.pixels_width / 2;
     uchar *buffer = (uchar *) malloc(sizeof(uchar)* win.pixels_width);
     int *current_task_asign = (int *) malloc(sizeof(int) * win.pixels_width);
-
+    double idle_and_recv_time = 0;
+    double send_time = 0;
+    double t_aux;
+    double total_time = MPI_Wtime();
+    MPI_Request myRequest;
     int i;
     for (i = 1; i < com_size && i < total_tasks; i++){
-        MPI_Send(&current_task, 1, MPI_INT, i, TASK, MPI_COMM_WORLD);
         current_task_asign[i] = current_task;
+        t_aux = MPI_Wtime();
+            MPI_Isend(&current_task_asign[i], 1, MPI_INT, i, TASK, MPI_COMM_WORLD, &myRequest);
+        send_time += MPI_Wtime() - t_aux;
         current_task++;
     }
 
     while(tasks_solved < total_tasks + 1){
-        MPI_Recv(buffer, win.pixels_width, MPI_UNSIGNED_CHAR, MPI_ANY_SOURCE, DATA, MPI_COMM_WORLD, &status);
+
+        t_aux = MPI_Wtime();
+            MPI_Recv(buffer, win.pixels_width, MPI_UNSIGNED_CHAR, MPI_ANY_SOURCE, DATA, MPI_COMM_WORLD, &status);
+        idle_and_recv_time += MPI_Wtime() - t_aux;
+
         int previous_task = current_task_asign[status.MPI_SOURCE];
         tasks_solved++;
 
         if (current_task < total_tasks + 1){
-            MPI_Send(&current_task, 1, MPI_INT, status.MPI_SOURCE, TASK, MPI_COMM_WORLD);
             current_task_asign[status.MPI_SOURCE] = current_task;
+
+            t_aux = MPI_Wtime();
+                MPI_Isend(&current_task_asign[status.MPI_SOURCE], 1, MPI_INT, status.MPI_SOURCE, TASK, MPI_COMM_WORLD, &myRequest);
+            send_time += MPI_Wtime() - t_aux;
             current_task++;
         }else{
-            MPI_Send(&current_task, 1, MPI_INT, status.MPI_SOURCE, FINISH, MPI_COMM_WORLD);
             current_task_asign[status.MPI_SOURCE] = -1;
+            t_aux = MPI_Wtime();
+                MPI_Isend(&current_task_asign[status.MPI_SOURCE], 1, MPI_INT, status.MPI_SOURCE, FINISH, MPI_COMM_WORLD, &myRequest);
+            send_time += MPI_Wtime() - t_aux;
+
         }
 
         memcpy(image + previous_task * win.pixels_width, buffer, sizeof(uchar) * win.pixels_width);
-        /*
-        if (previous_task != total_tasks){
-            memcpy(image + (2 * total_tasks - previous_task) * win.pixels_width, buffer, sizeof(uchar) * win.pixels_width);
+
+        if (previous_task != total_tasks && previous_task != 0){
+            int reflexion = win.pixels_height - previous_task;
+            memcpy(image + reflexion * win.pixels_width, buffer, sizeof(uchar) * win.pixels_width);
         }
-        */
     }
+
+    total_time = MPI_Wtime() - total_time;
+    printf("%f %f %f\n", total_time, send_time, idle_and_recv_time);
 
     free(buffer);
     free(current_task_asign);
@@ -124,7 +142,6 @@ void dynamic_row_assignment(int argc, char *argv[]){
         server(win, com_size, image);
         char path[100];
         sprintf(path, "mandelbrot_%s_%s.ppm", argv[1], argv[2]);
-        write_pgm(path, win.pixels_height, win.pixels_width, 256, image);
         write_pgm(path, win.pixels_height, win.pixels_width, 256, image);
         free(image);
     }else{
