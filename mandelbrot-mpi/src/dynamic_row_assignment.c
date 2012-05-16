@@ -116,7 +116,6 @@ void server(window win, int com_size, uchar *image){
 
     total_time = MPI_Wtime() - total_time;
     printf("%f %f %f\n", total_time, send_time, idle_and_recv_time);
-
     free(buffer);
     free(current_task_asign);
 }
