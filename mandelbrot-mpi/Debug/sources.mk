@@ -6,6 +6,7 @@ O_SRCS :=
 C_SRCS := 
 S_UPPER_SRCS := 
 OBJ_SRCS := 
+CU_SRCS := 
 ASM_SRCS := 
 OBJS := 
 C_DEPS := 

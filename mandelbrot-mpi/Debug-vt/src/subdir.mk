@@ -9,6 +9,7 @@ C_SRCS += \
 ../src/main.c \
 ../src/mandelbrot_iteration.c \
 ../src/math_optimizations.c \
+../src/mpi_time_wrapped_calls.c \
 ../src/ppm.c \
 ../src/sparse_rows.c 
 
@@ -18,6 +19,7 @@ OBJS += \
 ./src/main.o \
 ./src/mandelbrot_iteration.o \
 ./src/math_optimizations.o \
+./src/mpi_time_wrapped_calls.o \
 ./src/ppm.o \
 ./src/sparse_rows.o 
 
@@ -27,6 +29,7 @@ C_DEPS += \
 ./src/main.d \
 ./src/mandelbrot_iteration.d \
 ./src/math_optimizations.d \
+./src/mpi_time_wrapped_calls.d \
 ./src/ppm.d \
 ./src/sparse_rows.d 
 
