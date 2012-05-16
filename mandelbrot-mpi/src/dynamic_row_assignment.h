@@ -15,8 +15,9 @@
 #include "mandelbrot_iteration.h"
 
 void calc_row(window win, int row, int max_iter, uchar *buffer);
-void server(window win, int com_size, uchar *image);
-void client(window win, int com_root, int max_iter);
+
+void server(window win, int com_size, int com_rank, uchar *image);
+void client(window win, int com_root, int com_rank, int max_iter);
 
 void dynamic_row_assignment(int argc, char *argv[]);
 
