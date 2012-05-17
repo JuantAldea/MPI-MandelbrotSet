@@ -46,22 +46,25 @@ void server2(window win, int com_size, int com_rank, int task_size, uchar *image
     uchar *data_buffer = (uchar *) malloc(sizeof(uchar)* win.pixels_width * task_size);
     task  *current_task_assignment = (task *)malloc(sizeof(task) * com_size);
     task first, last_task;
+
+    //set first and last task
     first[0] = 0;
     first[1] = task_size;
     last_task[0] = total_tasks;
     last_task[1] = 0;
-    first_assignment(first, last_task, current_task_assignment, com_size);
 
+    first_assignment(first, last_task, current_task_assignment, com_size);
     populate_nodes(current_task_assignment, com_size);
     task current_task;
     get_task(current_task_assignment, com_size - 1, current_task);
     while(tasks_solved < total_tasks){
+        //show the task assignment for each node
         print_task(current_task_assignment, com_size);
         MPI_Recv(data_buffer, win.pixels_width * task_size, MPI_UNSIGNED_CHAR, MPI_ANY_SOURCE, DATA, MPI_COMM_WORLD, &status);
-        //SAVE OLD TASK INFO
+        //save old task info
         task received_data_task;
         get_task(current_task_assignment, status.MPI_SOURCE, received_data_task);
-        //SEND NEW TASK
+        //send new task
         next_task(current_task, last_task, current_task);
         set_task(current_task_assignment, status.MPI_SOURCE, current_task);
         if (is_last_task(current_task)){
@@ -69,13 +72,12 @@ void server2(window win, int com_size, int com_rank, int task_size, uchar *image
         }else{
             MPI_Send(current_task, 2, MPI_INT, status.MPI_SOURCE, TASK, MPI_COMM_WORLD);
         }
-        //USE OLD TASK INFO TO COMPOSE THE IMAGE
-        printf("recibida [%d, %d]\n", received_data_task[0], received_data_task[1]);
-
+        //use old task info to compose the image
+        printf("received [%d, %d]\n", received_data_task[0], received_data_task[1]);
         memcpy(image + received_data_task[0] * win.pixels_width, data_buffer, sizeof(uchar) * win.pixels_width * received_data_task[1]);
         for (int i = 0; i < received_data_task[1]; i++){
             if (received_data_task[0] == 0 && i == 0){
-                continue; //ignore row 0
+                continue; //ignore row 0 so it has the half row as axis of reflection
             }
             memcpy(image + (win.pixels_height  - received_data_task[0] - i) * win.pixels_width, data_buffer + (i * win.pixels_width), sizeof(uchar) * win.pixels_width);
         }
@@ -113,7 +115,7 @@ void dynamic2(int argc, char *argv[]){
         memset(image, 0, sizeof(uchar) * win.pixels_height * win.pixels_width);
         server2(win, com_size, com_rank, task_size, image);
         char path[100];
-        sprintf(path, "mandelbrot_%s_%s.pgm", win.pixels_height, max_iters);
+        sprintf(path, "mandelbrot_%d_%d.pgm", win.pixels_height, max_iters);
         write_pgm(path, win.pixels_height, win.pixels_width, 256, image);
 
         free(image);

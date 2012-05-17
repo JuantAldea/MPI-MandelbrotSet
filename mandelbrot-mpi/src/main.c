@@ -10,8 +10,7 @@
 #include "algorithms.h"
 
 int main(int argc, char* argv[]) {
-    int option = atoi(argv[1]);
-    switch(option){
+    switch(atoi(argv[1])){
         case 0:
             sparse_rows_version(argc, argv);
             break;

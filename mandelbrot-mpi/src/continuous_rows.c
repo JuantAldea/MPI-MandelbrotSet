@@ -105,7 +105,7 @@ void continuous_rows_version(int argc, char *argv[]) {
                     win.pixels_width);
         }
         char path[100];
-        sprintf(path, "mandelbrot_%s_%s.pgm", win.pixels_height, max_iters);
+        sprintf(path, "mandelbrot_%d_%d.pgm", win.pixels_height, max_iters);
         write_pgm(path, win.pixels_height, win.pixels_width, 255, buffer);
         free(buffer);
     }

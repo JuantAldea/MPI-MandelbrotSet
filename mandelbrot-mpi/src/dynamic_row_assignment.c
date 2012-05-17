@@ -71,8 +71,7 @@ void server(window win, int com_size, int com_rank, uchar *image){
     uchar *buffer = (uchar *) malloc(sizeof(uchar)* win.pixels_width);
     int *current_task_asignement = (int *) malloc(sizeof(int) * win.pixels_width);
     memset(current_task_asignement, 0, sizeof(int) * win.pixels_width);
-    MPI_Request send_request;
-    MPI_Request recv_request;
+    MPI_Request send_request, recv_request;
 
     double wait_time = 0;
     double send_time = 0;
@@ -161,7 +160,7 @@ void dynamic_row_assignment(int argc, char *argv[]){
         memset(image, 0, sizeof(uchar) * win.pixels_height * win.pixels_width);
         server(win, com_size, com_rank, image);
         char path[100];
-        sprintf(path, "mandelbrot_%s_%s.pgm", win.pixels_height, max_iters);
+        sprintf(path, "mandelbrot_%d_%d.pgm", win.pixels_height, max_iters);
         write_pgm(path, win.pixels_height, win.pixels_width, 256, image);
         free(image);
     }else{
