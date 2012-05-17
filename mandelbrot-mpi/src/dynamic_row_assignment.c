@@ -30,12 +30,13 @@ void client(window win, int com_root, int com_rank, int max_iter) {
     MPI_Request request;
     int communication_buffer = 0;
     uchar *buffer = (uchar *)malloc(sizeof(uchar) * win.pixels_width);
-    int tasks_solved = 0;
 
+    int tasks_solved = 0;
     double total_time = MPI_Wtime();
     double receive_time = 0;
     double send_time = 0;
     double wait_time = 0;
+
     while(1){
         receive_time += mpi_irecv_time(&communication_buffer, 1, MPI_INT, com_root, MPI_ANY_TAG, MPI_COMM_WORLD, &request);
         wait_time += mpi_wait_time(&request, &status);

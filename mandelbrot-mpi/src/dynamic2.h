@@ -18,8 +18,8 @@
 
 void client2(window win, int com_root, int com_rank, int max_iter, int task_size);
 void server2(window win, int com_size, int com_rank, int task_size, uchar *image);
-void populate_nodes(task task_assignmet[], int com_size);
 void calc_row2(window win, int row, int max_iter, uchar *buffer);
+double populate_nodes(task task_assignmet[], int com_size);
 
 void dynamic2(int argc, char *argv[]);
 
