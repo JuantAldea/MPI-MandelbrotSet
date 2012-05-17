@@ -10,6 +10,8 @@
 #include "algorithms.h"
 
 int main(int argc, char* argv[]) {
+    system("rm -f *pgm");
+    system("rm -f *ppm");
     switch(atoi(argv[1])){
         case 0:
             sparse_rows_version(argc, argv);

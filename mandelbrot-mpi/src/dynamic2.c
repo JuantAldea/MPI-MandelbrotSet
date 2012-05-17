@@ -175,8 +175,6 @@ void dynamic2(int argc, char *argv[]){
     MPI_Comm_size(MPI_COMM_WORLD, &com_size);
 
     if (com_rank == com_root){
-        system("rm -f *pgm");
-        system("rm -f *ppm");
         uchar *image = (uchar *)malloc(sizeof(uchar) * (size_t)(win.pixels_height * win.pixels_width));
         memset(image, 128, sizeof(uchar) * (size_t)(win.pixels_height * win.pixels_width));
         server2(win, com_size, com_rank, task_size, image);
