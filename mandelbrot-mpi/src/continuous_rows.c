@@ -57,8 +57,8 @@ void continuous_rows_version(int argc, char *argv[]) {
 
     MPI_Init(&argc, &argv);
     window win;
-    int max_iters = atoi(argv[2]);
-    win.pixels_height = atoi(argv[1]);
+    int max_iters = atoi(argv[3]);
+    win.pixels_height = atoi(argv[2]);
     win.pixels_width = win.pixels_height;
     win.x_start = -2;
     win.x_len = 0.8f + 2.0f;
@@ -105,7 +105,7 @@ void continuous_rows_version(int argc, char *argv[]) {
                     win.pixels_width);
         }
         char path[100];
-        sprintf(path, "mandelbrot_%s_%s.ppm", argv[1], argv[2]);
+        sprintf(path, "mandelbrot_%s_%s.pgm", win.pixels_height, max_iters);
         write_pgm(path, win.pixels_height, win.pixels_width, 255, buffer);
         free(buffer);
     }

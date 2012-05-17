@@ -21,4 +21,6 @@ typedef struct {
 
 typedef enum{TASK = 0, FINISH, TASK_REQUEST, DATA} msg_tag;
 
+typedef int task[2];
+
 #endif /* TYPES_H_ */

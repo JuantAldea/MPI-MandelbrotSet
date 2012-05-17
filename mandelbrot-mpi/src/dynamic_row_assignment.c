@@ -12,7 +12,6 @@
 #include "ppm.h"
 #include "dynamic_row_assignment.h"
 #include "mpi_time_wrapped_calls.h"
-typedef int task_data[2];
 
 void calc_row(window win, int row, int max_iter, uchar *buffer) {
     double dy = win.y_len /(double) win.pixels_height;
@@ -162,7 +161,7 @@ void dynamic_row_assignment(int argc, char *argv[]){
         memset(image, 0, sizeof(uchar) * win.pixels_height * win.pixels_width);
         server(win, com_size, com_rank, image);
         char path[100];
-        sprintf(path, "mandelbrot_%s_%s.ppm", argv[1], argv[2]);
+        sprintf(path, "mandelbrot_%s_%s.pgm", win.pixels_height, max_iters);
         write_pgm(path, win.pixels_height, win.pixels_width, 256, image);
         free(image);
     }else{
