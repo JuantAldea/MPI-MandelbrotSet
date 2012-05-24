@@ -8,6 +8,6 @@ mandelbrot: main.cu ppm.o
 
 ppm.o: ppm.c ppm.h
 	$(CC) $(CFLAGS) -c ppm.c
-	
+
 clean:
 	rm -f mandelbrot *.o

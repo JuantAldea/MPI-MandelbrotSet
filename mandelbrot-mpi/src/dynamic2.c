@@ -5,9 +5,11 @@
  *      Author: Juan Antonio Aldea Armenteros
  */
 
+#define PRINT_IMAGE
 #include <mpi.h>
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
 #include "mpi_time_wrapped_calls.h"
 #include "dynamic2.h"
 
@@ -18,7 +20,8 @@ void calc_row2(window win, int row, int max_iter, uchar *buffer) {
     float zr;
     for (int i = 0; i < win.pixels_width; i++) {
         zr = (float) win.x_start + (float) i * dx;
-        buffer[i] = ((mandelbrot_iteration(zr, zi, max_iter) == max_iter) ? 255 : 0);
+        //buffer[i] = ((mandelbrot_iteration(zr, zi, max_iter) == max_iter) ? 255 : 0);
+        buffer[i] = (uchar)((mandelbrot_iteration(zr, zi, max_iter)/(float)max_iter) * 255);
     }
 }
 
@@ -35,9 +38,14 @@ void client2(window win, int com_root, int com_rank, int max_iter, int task_size
     double total_time = MPI_Wtime();
 
     while(1){
+
+        //printf("Cliente esperando...\n");
+
         //MPI_Recv(&assignment, 2, MPI_INT, com_root, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
         receive_time += mpi_irecv_time(&assignment, 2, MPI_INT, com_root, MPI_ANY_TAG, MPI_COMM_WORLD, &request);
         wait_time += mpi_wait_time(&request, &status);
+
+        //printf("Cliente trabajando\n");
 
         if(status.MPI_TAG == FINISH){
             break;
@@ -46,6 +54,9 @@ void client2(window win, int com_root, int com_rank, int max_iter, int task_size
         for (int i = 0; i < assignment[1]; i++){
             calc_row2(win, assignment[0] + i, max_iter, &buffer[i * win.pixels_width]);
         }
+
+        //printf("Cliente esperando a entregar\n");
+
         //MPI_Send(buffer, win.pixels_width * assignment[1], MPI_UNSIGNED_CHAR, com_root, DATA, MPI_COMM_WORLD);
         send_time += mpi_isend_time(buffer, win.pixels_width * assignment[1], MPI_UNSIGNED_CHAR, com_root, DATA, MPI_COMM_WORLD, &request);
         wait_time += mpi_wait_time(&request, &status);
@@ -74,6 +85,7 @@ double populate_nodes(task task_assignmet[], int com_size){
 }
 
 void server2(window win, int com_size, int com_rank, int task_size, uchar *image){
+
     MPI_Status status;
     MPI_Request send_request, recv_request;
     int tasks_solved = 0;
@@ -81,7 +93,7 @@ void server2(window win, int com_size, int com_rank, int task_size, uchar *image
     uchar *data_buffer = (uchar *) malloc(sizeof(uchar)* (size_t)(win.pixels_width * task_size));
     task  *current_task_assignment = (task *)malloc(sizeof(task) * (size_t)com_size);
     task first, last_task, current_task;
-
+    task_size = min(task_size, total_tasks);
     //set first and last task
     first[0] = 0;
     first[1] = task_size;
@@ -98,11 +110,15 @@ void server2(window win, int com_size, int com_rank, int task_size, uchar *image
     get_task(current_task_assignment, com_size - 1, current_task);
     while(tasks_solved < total_tasks){
         //show the task assignment for each node
-        print_task(current_task_assignment, com_size);
+
+        //print_task(current_task_assignment, com_size);
+        //printf("Servidor esperando entrega\n");
 
         //MPI_Recv(data_buffer, win.pixels_width * task_size, MPI_UNSIGNED_CHAR, MPI_ANY_SOURCE, DATA, MPI_COMM_WORLD, &status);
         recv_time += mpi_irecv_time(data_buffer, win.pixels_width * task_size, MPI_UNSIGNED_CHAR, MPI_ANY_SOURCE, DATA, MPI_COMM_WORLD, &recv_request);
         wait_time += mpi_wait_time(&recv_request, &status);
+
+        //printf("Servidor recibio entrega\n");
 
         //save old task info
         task received_data_task;
@@ -110,6 +126,7 @@ void server2(window win, int com_size, int com_rank, int task_size, uchar *image
         //send new task
         next_task(current_task, last_task, current_task);
         set_task(current_task_assignment, status.MPI_SOURCE, current_task);
+        //printf("Servidor enviando tarea\n");
         if (is_last_task(current_task)){
             //MPI_Send(current_task, 2, MPI_INT, status.MPI_SOURCE, FINISH, MPI_COMM_WORLD);
             send_time += mpi_isend_time(current_task, 2, MPI_INT, status.MPI_SOURCE, FINISH, MPI_COMM_WORLD, &send_request);
@@ -117,8 +134,12 @@ void server2(window win, int com_size, int com_rank, int task_size, uchar *image
             //MPI_Send(current_task, 2, MPI_INT, status.MPI_SOURCE, TASK, MPI_COMM_WORLD);
             send_time += mpi_isend_time(current_task, 2, MPI_INT, status.MPI_SOURCE, TASK, MPI_COMM_WORLD, &send_request);
         }
+
         //use old task info to compose the image
-        printf("received [%d, %d]\n", received_data_task[0], received_data_task[1]);
+        //printf("Servidor componiendo imagen\n");
+        //printf("received [%d, %d]\n", received_data_task[0], received_data_task[1]);
+
+#ifdef PRINT_IMAGE
         memcpy(image + received_data_task[0] * win.pixels_width, data_buffer, sizeof(uchar) * (size_t)(win.pixels_width * received_data_task[1]));
         for (int i = 0; i < received_data_task[1]; i++){
             if (received_data_task[0] == 0 && i == 0){
@@ -127,10 +148,13 @@ void server2(window win, int com_size, int com_rank, int task_size, uchar *image
             memcpy(image + (win.pixels_height  - received_data_task[0] - i) * win.pixels_width, data_buffer + (i * win.pixels_width), sizeof(uchar) * (size_t)win.pixels_width);
         }
 
-        char path[20];
-        sprintf(path, "%d-%d.pgm", received_data_task[0], received_data_task[1]);
-        write_pgm(path, win.pixels_height, win.pixels_width, 256, image);
+        //char path[20];
+        //sprintf(path, "%d-%d.pgm", received_data_task[0], received_data_task[1]);
+        //write_pgm(path, win.pixels_height, win.pixels_width, 256, image);
+#endif
         tasks_solved += received_data_task[1];
+
+        //printf("Servidor termino de componer\n");
     }
 
     total_time = MPI_Wtime() - total_time;

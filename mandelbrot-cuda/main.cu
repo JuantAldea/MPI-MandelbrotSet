@@ -15,12 +15,7 @@ extern "C" {
 #include "ppm.h"
 }
 
-__global__ void render(unsigned char *out, int width, int height) {
-	//for (int i = 0; i < pix_per_thread; i++){
-	//for (int j = 0; j < pix_per_thread; j++){
-
-	//unsigned int x_dim = blockIdx.x * blockDim.x * pix_per_thread + threadIdx.x * pix_per_thread + i;
-	//unsigned int y_dim = blockIdx.y * blockDim.y * pix_per_thread + threadIdx.y * pix_per_thread + j;
+__global__ void render(unsigned char *out, int width, int height, int max_iterations) {
 	unsigned int x_dim = blockIdx.x * blockDim.x + threadIdx.x;
 	unsigned int y_dim = blockIdx.y * blockDim.y + threadIdx.y;
 	int index = 3 * width * y_dim + x_dim * 3;
@@ -30,16 +25,14 @@ __global__ void render(unsigned char *out, int width, int height) {
 	float y = 0.0;
 
 	int iteration = 0;
-	int max_iteration = 1000;
-
-	while (x * x + y * y <= 4 && iteration < max_iteration) {
+	while (x * x + y * y <= 4 && iteration < max_iterations) {
 		float xtemp = x * x - y * y + x_origin;
 		y = 2 * x * y + y_origin;
 		x = xtemp;
 		iteration++;
 	}
 	//out[index]++;
-	if (iteration == max_iteration) {
+	if (iteration == max_iterations) {
 		out[index + 0] = 0;
 		out[index + 1] = 0;
 		out[index + 2] = 0;
@@ -48,15 +41,12 @@ __global__ void render(unsigned char *out, int width, int height) {
 		out[index + 1] = iteration < 255 ? iteration : 255;
 		out[index + 2] = iteration < 255 ? iteration : 255;
 	}
-//    }
-	//}
 }
 
-void runCUDA(int width, int height) {
+void runCUDA(int width, int height, int max_iterations) {
 	size_t buffer_size = sizeof(unsigned char) * width * height * 3;
 	unsigned char *device_memory, *host_memory;
 	dim3 blockDim(16, 16, 1);
-	//dim3 gridDim(width / (pix_per_thread * blockDim.x), height / (2 * pix_per_thread * blockDim.y), 1);
 	dim3 gridDim(width / (blockDim.x), height / (2 * blockDim.y), 1);
 	cudaError_t cuda_error;
 	cudaDeviceReset();
@@ -85,19 +75,33 @@ void runCUDA(int width, int height) {
 		host_memory = (unsigned char *) malloc(buffer_size);
 	}
 
-	//ejecuta el kernel
-	render<<< gridDim, blockDim, 0 >>>(device_memory, width, height);
+	/************************************************************************/
+	cudaEvent_t start, stop;
+	cudaEventCreate(&start);
+	cudaEventCreate(&stop);
+	cudaEventRecord(start, 0);
+
+	render<<< gridDim, blockDim, 0 >>>(device_memory, width, height, max_iterations);
+
+	cudaEventRecord(stop, 0);
+	cudaEventSynchronize(stop);
+	float elapsedTime;
+	cudaEventElapsedTime(&elapsedTime, start, stop);
+	cudaEventDestroy(start);
+	cudaEventDestroy(stop);
+	/*****************************************************************************/
 
 	if (cuda_error == cudaSuccess && host_alloc) {
 		cuda_error = cudaThreadSynchronize();
 		printf("Host barrier %s\n", cudaGetErrorString(cuda_error));
 	} else {
-		cuda_error = cudaMemcpy(host_memory, device_memory, buffer_size,
-				cudaMemcpyDeviceToHost);
+		cuda_error = cudaMemcpy(host_memory, device_memory, buffer_size, cudaMemcpyDeviceToHost);
 		printf("Device %s\n", cudaGetErrorString(cuda_error));
 	}
 
-	write_ppm("broza.ppm", height, width, 255, host_memory);
+	char path[100];
+	sprintf(path, "cuda_%d_%d.ppm", height, max_iterations);
+	write_ppm("path", height, width, 255, host_memory);
 
 	if (cuda_error == cudaSuccess && host_alloc) {
 		cuda_error = cudaFreeHost(host_memory);
@@ -110,7 +114,8 @@ void runCUDA(int width, int height) {
 }
 
 int main(int argc, const char * argv[]) {
-	int dim = 2048;
-	runCUDA(dim, dim);
+	int dim = atoi(argv[1]);
+	int max_iterations = atoi(argv[2]);
+	runCUDA(dim, dim, max_iterations);
 	return 0;
 }

@@ -44,7 +44,6 @@ uchar *sparse_rows_image_reconstruction(int n_threads, int pixels_height, int pi
     return output;
 }
 
-
 void sparse_rows_version(int argc, char *argv[]) {
     window win;
     int max_iters = atoi(argv[3]);

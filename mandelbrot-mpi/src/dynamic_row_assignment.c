@@ -14,13 +14,13 @@
 #include "mpi_time_wrapped_calls.h"
 
 void calc_row(window win, int row, int max_iter, uchar *buffer) {
-    double dy = win.y_len /(double) win.pixels_height;
-    double dx = win.x_len /(double) win.pixels_width;
-    double zi = (double) win.y_start + (double) row * dy;
-    double zr;
+    float dy = win.y_len /(float) win.pixels_height;
+    float dx = win.x_len /(float) win.pixels_width;
+    float zi = (float) win.y_start + (float) row * dy;
+    float zr;
     int i;
     for (i = 0; i < win.pixels_width; i++) {
-        zr = (double) win.x_start + (double) i * dx;
+        zr = (float) win.x_start + (float) i * dx;
         buffer[i] = ((mandelbrot_iteration(zr, zi, max_iter) == max_iter) ? 255 : 0);
     }
 }
