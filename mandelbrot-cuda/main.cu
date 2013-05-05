@@ -87,6 +87,7 @@ void runCUDA(int width, int height, int max_iterations) {
 	cudaEventSynchronize(stop);
 	float elapsedTime;
 	cudaEventElapsedTime(&elapsedTime, start, stop);
+	printf("Elapsed time %f ms \n", elapsedTime);
 	cudaEventDestroy(start);
 	cudaEventDestroy(stop);
 	/*****************************************************************************/
@@ -101,7 +102,7 @@ void runCUDA(int width, int height, int max_iterations) {
 
 	char path[100];
 	sprintf(path, "cuda_%d_%d.ppm", height, max_iterations);
-	write_ppm("path", height, width, 255, host_memory);
+	write_ppm(path, height, width, 255, host_memory);
 
 	if (cuda_error == cudaSuccess && host_alloc) {
 		cuda_error = cudaFreeHost(host_memory);
