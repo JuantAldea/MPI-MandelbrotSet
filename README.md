@@ -1,6 +1,6 @@
 MPI-MandelbrotSet
 ====
 
-Two Mandelbrot Set calculators, one using MPI and the other using Nvidia CUDA.
+A few differentt algorithms for calculating Mandelbrot Set using MPI
 
-Best MPI version on dynamic2.{cpp, h} files, it uses a Master-Slave strategy.
+Best version on dynamic2.{cpp, h} files, it uses a Master-Slave strategy.
