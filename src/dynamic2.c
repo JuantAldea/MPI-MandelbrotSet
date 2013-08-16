@@ -139,7 +139,7 @@ void server2(window win, int com_size, int com_rank, int task_size,
     last_task[0] = total_tasks;
     last_task[1] = 0;
     first_assignment(first, last_task, current_task_assignment, com_size);
-    print_task(current_task_assignment, com_size);
+    
     double wait_time = 0;
     double send_time = 0;
     double recv_time = 0;
