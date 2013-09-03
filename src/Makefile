@@ -1,4 +1,3 @@
-
 CFILES := $(wildcard *.c)
 TARGET := mandelbrot
 CFLAGS := -Wall -Wextra -pedantic -O3 -std=c99
@@ -19,7 +18,7 @@ $(TARGET) : $(OBJFILES)
 	$(LINK.o) $(CFLAGS) $(MPI_COMPILE_FLAGS) $(MPI_LINK_FLAGS) -o $@ $^
 
 %.o : %.c
-	$(CC) $(CFLAGS) $(MPI_COMPILE_FLAGS) $(MPI_LINK_FLAGS) -c -o $@ $^
+	$(CC) $(CFLAGS) $(MPI_COMPILE_FLAGS) $(MPI_LINK_FLAGS) -c -o $@ $<
 
 
 clean :
