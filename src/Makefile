@@ -1,4 +1,3 @@
-
 CFILES := $(wildcard *.c)
 TARGET := mandelbrot
 CFLAGS := -Wall -Wextra -pedantic -O3 -std=c99
